@@ -1,38 +1,31 @@
-import axios from 'axios';
-import { useEffect } from 'react';
-import JSMpeg from '@cycjimmy/jsmpeg-player';
+import Hls from 'hls.js';
+import { useEffect, useRef } from 'react';
 
 const App = () => {
+	const videoRef = useRef();
+
 	useEffect(() => {
-		let canvas = document.getElementById('video-canvas');
-		let url = 'ws://localhost:4001';
-		new JSMpeg.Player(url, { canvas: canvas });
+		const hls = new Hls({ debug: true, });
+		if (Hls.isSupported()) {
+			hls.log = true;
+			hls.loadSource = '/stream/camera11/index.m3u8';
+			hls.attachMedia(videoRef.current);
+			hls.on(Hls.Events.ERROR, (err) => {
+				console.log(err);
+			});
+		} else {
+			console.log('load');
+		}
 	}, []);
 
-	const rtspurl = 'rtsp://admin:Dsspl@123@103.97.243.100:554/1/1'; //enter the rtsp url here
-
-	const httpRequest = (url) => {
-		axios.get(`http://127.0.0.1:4000/stream?rtsp=${url}`);
-	};
-
-	const startRTSPFeed = () => {
-		httpRequest(rtspurl);
-	};
-
-	const stopRTSPFeed = () => {
-		httpRequest('stop');
-	};
-
 	return (
-		<div>
-			<div>
-				<canvas id='video-canvas' height={500} width={800}></canvas>
-			</div>
-			<div>
-				<button onClick={startRTSPFeed}>Start RTSP Feed</button>
-				<button onClick={stopRTSPFeed}> Stop RTSP Feed</button>
-			</div>
-		</div>
+		<video
+			controls
+			autoPlay
+			width={640}
+			height={480}
+			ref={videoRef}
+		/>
 	);
 };
 

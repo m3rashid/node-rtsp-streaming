@@ -15,8 +15,9 @@ const handler = (url) => {
 };
 
 app.ws('/api/stream', (ws, req) => {
-	const url = req.query.url;
-	handler(url)(ws, req);
+	const maskedURL = req.query.url;
+	const unmaskedURL = maskedURL?.replace(/\/question/g, '?')?.replace(/\/and/g, '&');
+	handler(unmaskedURL)(ws, req);
 });
 
 app.listen(2000);

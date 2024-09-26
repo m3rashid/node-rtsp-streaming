@@ -5,19 +5,15 @@ app.use(cors());
 
 const { proxy } = require('rtsp-relay')(app);
 
-const handler = (url) => {
-	return proxy({
-		additionalFlags: ['-q', '1'],
-		url: url,
-		transport: 'tcp',
-		verbose: true,
-	});
-};
-
 app.ws('/api/stream', (ws, req) => {
-	const maskedURL = req.query.url;
-	const unmaskedURL = maskedURL?.replace(/\/question/g, '?')?.replace(/\/and/g, '&');
-	handler(unmaskedURL)(ws, req);
+	const maskedUrl = new String(req.query.url);
+	const unmaskedURL = maskedUrl?.replace(/\/question/g, '?')?.replace(/\/and/g, '&');
+	proxy({
+		verbose: true,
+		transport: 'tcp',
+		url: unmaskedURL,
+		additionalFlags: ['-q', '1'],
+	})(ws, req);
 });
 
-app.listen(2000);
+app.listen(4000, () => console.log('Server started on port 4000'));
